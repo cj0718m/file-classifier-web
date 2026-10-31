@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 확장자 분류기</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">FASTAPI LOCAL WEB SERVICE</p>
+        <h1 id="page-title">파일 확장자 분류기</h1>
+        <p class="description">여러 파일을 선택하면 이름과 확장자만 확인해 카테고리로 분류합니다. 파일은 저장하지 않습니다.</p>
+      </section>
+
+      <section class="card" aria-label="파일 업로드">
+        <form action="/classify" method="post" enctype="multipart/form-data">
+          <label for="files">분류할 파일 선택</label>
+          <input id="files" name="files" type="file" multiple required>
+          <p class="hint">이미지: jpg, jpeg, png, gif · 문서: pdf, docx, pptx, txt · 영상: mp4, mov, avi · 압축: zip, rar, 7z</p>
+          <button type="submit">파일 분류하기</button>
+        </form>
+      </section>
+
+      {% if error %}
+      <section class="message error" role="alert">{{ error }}</section>
+      {% endif %}
+
+      {% if results %}
+      <section class="card results" aria-labelledby="results-title">
+        <div class="results-heading">
+          <h2 id="results-title">분류 결과</h2>
+          <span>{{ results|length }}개 파일</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>파일 이름</th><th>확장자</th><th>카테고리</th></tr>
+            </thead>
+            <tbody>
+              {% for result in results %}
+              <tr>
+                <td>{{ result.name }}</td>
+                <td><code>{{ result.extension }}</code></td>
+                <td><span class="badge badge-{{ result.category_class }}">{{ result.category }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
