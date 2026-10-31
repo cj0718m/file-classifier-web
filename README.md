@@ -62,3 +62,4 @@ file_extension_classifier/
 └── static/
     └── style.css           # 화면 스타일
 ```
+Deployment test completed on Render.
