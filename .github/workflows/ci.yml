@@ -32,3 +32,47 @@ jobs:
           context: .
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/file-classifier:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: [self-hosted, Windows, X64]
+
+    steps:
+      - name: Deploy latest Docker image
+        shell: powershell
+        run: |
+          $image = "cj0718m/file-classifier:latest"
+          $container = "file-classifier-app"
+
+          docker pull $image
+          if ($LASTEXITCODE -ne 0) {
+            throw "Docker pull failed"
+          }
+
+          $existing = docker ps -a --filter "name=^/$container$" --format "{{.Names}}"
+
+          if ($existing -eq $container) {
+            docker stop $container
+            if ($LASTEXITCODE -ne 0) {
+              throw "Docker stop failed"
+            }
+
+            docker rm $container
+            if ($LASTEXITCODE -ne 0) {
+              throw "Docker remove failed"
+            }
+          }
+
+          docker run -d --name $container -p 8000:8000 $image
+          if ($LASTEXITCODE -ne 0) {
+            throw "Docker run failed"
+          }
+
+          Start-Sleep -Seconds 5
+          $response = Invoke-WebRequest -Uri "http://localhost:8000/" -UseBasicParsing
+
+          if ($response.StatusCode -ne 200) {
+            throw "Health check failed"
+          }
+
+          Write-Host "Deployment successful!"
