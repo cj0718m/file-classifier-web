@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Deploy latest Docker image
-        shell: powershell
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $image = "cj0718m/file-classifier:latest"
           $container = "file-classifier-app"
